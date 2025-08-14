@@ -22,7 +22,7 @@ server = Server("qiniu-mcp-server")
 
 @server.set_logging_level()
 async def set_logging_level(level: LoggingLevel) -> EmptyResult:
-    logger.setLevel(level.lower())
+    logger.setLevel(level.upper())
     await server.request_context.session.send_log_message(
         level="warning", data=f"Log level set to {level}", logger=consts.LOGGER_NAME
     )
