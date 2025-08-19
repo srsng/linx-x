@@ -12,6 +12,7 @@ from . import core
 from .consts import consts
 from .resource import resource
 from .tools import tools
+from .context import current_session_id
 
 
 logger = logging.getLogger(consts.LOGGER_NAME)
@@ -22,7 +23,7 @@ server = Server("qiniu-mcp-server")
 
 @server.set_logging_level()
 async def set_logging_level(level: LoggingLevel) -> EmptyResult:
-    logger.setLevel(level.lower())
+    logger.setLevel(level.upper())
     await server.request_context.session.send_log_message(
         level="warning", data=f"Log level set to {level}", logger=consts.LOGGER_NAME
     )
@@ -50,4 +51,16 @@ async def handle_list_tools() -> list[Tool]:
 
 @server.call_tool()
 async def call_tool(name: str, arguments: dict):
+    # 从当前会话上下文中获取session_id
+    session_id = None
+    try:
+        # 优先从上下文变量获取
+        session_id = current_session_id.get()
+        if session_id:
+            # 无条件注入，schema中已包含可选的 session_id 字段
+            arguments["session_id"] = session_id
+            logger.debug(f"Injected session_id {session_id} into tool {name} arguments")
+    except Exception as e:
+        logger.warning(f"Could not get session_id for tool {name}: {e}")
+    
     return await tools.call_tool(name, arguments)

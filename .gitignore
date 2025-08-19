@@ -13,3 +13,6 @@ wheels/
 .env.kodo
 
 src/mcp_server/test.py
+
+.specstory
+.trae

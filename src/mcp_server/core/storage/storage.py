@@ -7,6 +7,7 @@ from botocore.config import Config as S3Config
 
 from ...config import config
 from ...consts import consts
+from ...session import SessionConfig
 
 logger = logging.getLogger(consts.LOGGER_NAME)
 
@@ -19,11 +20,24 @@ class StorageService:
             connect_timeout=30,
             read_timeout=60,
             max_pool_connections=50,
+            s3={'addressing_style': 'path'},  # Force path-style addressing for S3 compatibility
         )
         self.config = cfg
         self.s3_session = aioboto3.Session()
         self.auth = qiniu.Auth(cfg.access_key, cfg.secret_key)
         self.bucket_manager = qiniu.BucketManager(self.auth, preferred_scheme="https")
+
+    @classmethod
+    def from_session_config(cls, session_config: SessionConfig) -> 'StorageService':
+        """从会话配置创建StorageService实例"""
+        cfg = config.Config(
+            access_key=session_config.access_key,
+            secret_key=session_config.secret_key,
+            endpoint_url=session_config.endpoint_url,
+            region_name=session_config.region_name,
+            buckets=session_config.buckets
+        )
+        return cls(cfg)
 
     def get_object_url(
             self, bucket: str, key: str, disable_ssl: bool = False, expires: int = 3600
@@ -88,6 +102,7 @@ class StorageService:
                 aws_secret_access_key=self.config.secret_key,
                 endpoint_url=self.config.endpoint_url,
                 region_name=self.config.region_name,
+                config=self.s3_config,
         ) as s3:
             # If buckets are configured, only return those
             response = await s3.list_buckets()
@@ -125,6 +140,7 @@ class StorageService:
                 aws_secret_access_key=self.config.secret_key,
                 endpoint_url=self.config.endpoint_url,
                 region_name=self.config.region_name,
+                config=self.s3_config,
         ) as s3:
             response = await s3.list_objects_v2(
                 Bucket=bucket,
