@@ -24,12 +24,14 @@ Server 来访问七牛云存储、智能多媒体服务等。
 claude mcp add --transport sse qiniu https://your-domain.com/sse \
   --header "X-AK: client1-ak" \
   --header "X-SK: client1-sk" \
+  --header "X-REGION-NAME: test-region" \
   --header "X-BUCKETS: client1-bucket"
 
 # 客户端 2
 claude mcp add --transport sse qiniu https://your-domain.com/sse \
   --header "X-AK: client2-ak" \
   --header "X-SK: client2-sk" \
+  --header "X-REGION-NAME: test-region" \
   --header "X-BUCKETS: client2-bucket"
 ```
 

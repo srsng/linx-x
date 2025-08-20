@@ -43,13 +43,13 @@ def main(port: int, transport: str) -> int:
         async def handle_sse(request: Request):
             # 从HTTP headers提取认证信息
             headers = dict(request.headers)
-            config = load_config_from_headers(headers)
+            config, error_msg = load_config_from_headers(headers)
             
             if not config:
-                logger.error("Missing required authentication headers")
+                logger.error(f"Header validation failed: {error_msg}")
                 return JSONResponse(
                     status_code=401,
-                    content={"error": "Missing required authentication headers (X-AK, X-SK)"}
+                    content={"error": error_msg}
                 )
             
             # 创建会话

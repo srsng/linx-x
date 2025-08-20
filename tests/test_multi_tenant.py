@@ -53,7 +53,6 @@ class MultiTenantTester:
                 "headers": {
                     "X-AK": "client1-ak",
                     "X-SK": "client1-sk",
-                    "X-ENDPOINT-URL": "https://s3.test-region.qiniucs.com",
                     "X-REGION-NAME": "test-region",
                     "X-BUCKETS": "client1-bucket1,client1-bucket2"
                 }
@@ -63,7 +62,6 @@ class MultiTenantTester:
                 "headers": {
                     "X-AK": "client2-ak",
                     "X-SK": "client2-sk",
-                    "X-ENDPOINT-URL": "https://s3.test-region.qiniucs.com",
                     "X-REGION-NAME": "test-region",
                     "X-BUCKETS": "client2-bucket1"
                 }
@@ -73,7 +71,6 @@ class MultiTenantTester:
                 "headers": {
                     "X-AK": "client3-ak",
                     "X-SK": "client3-sk",
-                    "X-ENDPOINT-URL": "https://s3.test-region.qiniucs.com",
                     "X-REGION-NAME": "test-region",
                     "X-BUCKETS": "client3-bucket1,client3-bucket2,client3-bucket3"
                 }
