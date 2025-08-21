@@ -1,8 +1,8 @@
 from ..config import config
 from .storage import load as load_storage
-from .media_processing import load as load_media_processing
-from .cdn import load as load_cdn
 from .version import load as load_version
+# from .cdn import load as load_cdn
+# from .media_processing import load as load_media_processing
 
 
 def load():
