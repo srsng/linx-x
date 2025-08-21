@@ -16,7 +16,7 @@ def url_add_processing_func(auth: qiniu.auth, url: str, func: str) -> str:
 
     url_info = parse.urlparse(url)
     new_query = _query_add_processing_func(url_info.query, func, func_prefix)
-    new_query = parse.quote(new_query, safe='&=')
+    new_query = parse.quote(new_query, safe="&=")
     url_info = url_info._replace(query=new_query)
     new_url = parse.urlunparse(url_info)
     new_url = _sign_url(str(new_url), auth)
@@ -25,8 +25,8 @@ def url_add_processing_func(auth: qiniu.auth, url: str, func: str) -> str:
 
 def _query_add_processing_func(query: str, func: str, func_prefix: str) -> str:
     queries = query.split("&")
-    if '' in queries:
-        queries.remove('')
+    if "" in queries:
+        queries.remove("")
 
     # query 中不包含任何数据
     if len(queries) == 0:
@@ -54,8 +54,8 @@ def _query_add_processing_func(query: str, func: str, func_prefix: str) -> str:
         return "&".join(queries)
 
     query_funcs = first_query.split("|")
-    if '' in query_funcs:
-        query_funcs.remove('')
+    if "" in query_funcs:
+        query_funcs.remove("")
 
     # 只有一个 func，且和当前 func 相同，拼接其后
     if len(query_funcs) == 1:
@@ -81,25 +81,25 @@ def _query_add_processing_func(query: str, func: str, func_prefix: str) -> str:
 def _sign_url(url: str, auth: qiniu.auth) -> str:
     url_info = parse.urlparse(url)
     query = url_info.query
-    if ('e=' not in query) or ('token=' not in query):
+    if ("e=" not in query) or ("token=" not in query):
         return url
 
     queries = query.split("&")
-    if '' in queries:
-        queries.remove('')
+    if "" in queries:
+        queries.remove("")
 
     # 移除之前的签名信息，但顺序不可变
     expires = 3600
     new_queries = []
     for query_item in queries:
-        if query_item.startswith('e='):
+        if query_item.startswith("e="):
             try:
-                deadline = int(query_item.removeprefix('e='))
+                deadline = int(query_item.removeprefix("e="))
                 expires = deadline - int(time.time())
             except Exception as e:
                 logger.warning(f"expires parse fail for url:{url} err:{str(e)}")
                 expires = 3600
-        elif not query_item.startswith('token='):
+        elif not query_item.startswith("token="):
             new_queries.append(query_item)
 
     new_query = "&".join(new_queries)

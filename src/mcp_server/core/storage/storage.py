@@ -7,6 +7,7 @@ from botocore.config import Config as S3Config
 
 from ...config import config
 from ...consts import consts
+from ...session import SessionConfig
 
 logger = logging.getLogger(consts.LOGGER_NAME)
 
@@ -19,18 +20,38 @@ class StorageService:
             connect_timeout=30,
             read_timeout=60,
             max_pool_connections=50,
+            s3={
+                "addressing_style": "path"
+            },  # Force path-style addressing for S3 compatibility
         )
         self.config = cfg
         self.s3_session = aioboto3.Session()
         self.auth = qiniu.Auth(cfg.access_key, cfg.secret_key)
         self.bucket_manager = qiniu.BucketManager(self.auth, preferred_scheme="https")
 
+    @classmethod
+    def from_session_config(cls, session_config: SessionConfig) -> "StorageService":
+        """从会话配置创建StorageService实例"""
+        cfg = config.Config(
+            access_key=session_config.access_key,
+            secret_key=session_config.secret_key,
+            endpoint_url=session_config.endpoint_url,
+            region_name=session_config.region_name,
+            buckets=session_config.buckets,
+        )
+        return cls(cfg)
+
+    # todo: ssl验证
     def get_object_url(
-            self, bucket: str, key: str, disable_ssl: bool = False, expires: int = 3600
+        self, bucket: str, key: str, disable_ssl: bool = True, expires: int = 3600
     ) -> list[dict[str:Any]]:
         # 获取下载域名
-        domains_getter = getattr(self.bucket_manager, "_BucketManager__uc_do_with_retrier")
-        domains_list, domain_response = domains_getter('/v3/domains?tbl={0}'.format(bucket))
+        domains_getter = getattr(
+            self.bucket_manager, "_BucketManager__uc_do_with_retrier"
+        )
+        domains_list, domain_response = domains_getter(
+            "/v3/domains?tbl={0}".format(bucket)
+        )
         if domain_response.status_code != 200:
             raise Exception(
                 f"get bucket domain error：{domain_response.exception} reqId:{domain_response.req_id}"
@@ -53,10 +74,14 @@ class StorageService:
             if domain_url is None:
                 continue
 
-            object_public_urls.append({
-                "object_url": f"{http_schema}://{domain_url}/{key}",
-                "domain_type": "cdn" if domain.get("domaintype") is None or domain.get("domaintype") == 0 else "origin"
-            })
+            object_public_urls.append(
+                {
+                    "object_url": f"{http_schema}://{domain_url}/{key}",
+                    "domain_type": "cdn"
+                    if domain.get("domaintype") is None or domain.get("domaintype") == 0
+                    else "origin",
+                }
+            )
 
         object_urls = []
         bucket_info, bucket_info_response = self.bucket_manager.bucket_info(bucket)
@@ -69,7 +94,9 @@ class StorageService:
                 public_url = url_info.get("object_url")
                 if public_url is None:
                     continue
-                url_info["object_url"] = self.auth.private_download_url(public_url, expires=expires)
+                url_info["object_url"] = self.auth.private_download_url(
+                    public_url, expires=expires
+                )
                 object_urls.append(url_info)
         else:
             for url_info in object_public_urls:
@@ -83,11 +110,12 @@ class StorageService:
         max_buckets = 50
 
         async with self.s3_session.client(
-                "s3",
-                aws_access_key_id=self.config.access_key,
-                aws_secret_access_key=self.config.secret_key,
-                endpoint_url=self.config.endpoint_url,
-                region_name=self.config.region_name,
+            "s3",
+            aws_access_key_id=self.config.access_key,
+            aws_secret_access_key=self.config.secret_key,
+            endpoint_url=self.config.endpoint_url,
+            region_name=self.config.region_name,
+            config=self.s3_config,
         ) as s3:
             # If buckets are configured, only return those
             response = await s3.list_buckets()
@@ -107,7 +135,7 @@ class StorageService:
             return configured_bucket_list[:max_buckets]
 
     async def list_objects(
-            self, bucket: str, prefix: str = "", max_keys: int = 20, start_after: str = ""
+        self, bucket: str, prefix: str = "", max_keys: int = 100, start_after: str = ""
     ) -> List[dict]:
         if self.config.buckets and bucket not in self.config.buckets:
             logger.warning(f"Bucket {bucket} not in configured bucket list")
@@ -116,15 +144,16 @@ class StorageService:
         if isinstance(max_keys, str):
             max_keys = int(max_keys)
 
-        if max_keys > 100:
-            max_keys = 100
+        if max_keys > 500:
+            max_keys = 500
 
         async with self.s3_session.client(
-                "s3",
-                aws_access_key_id=self.config.access_key,
-                aws_secret_access_key=self.config.secret_key,
-                endpoint_url=self.config.endpoint_url,
-                region_name=self.config.region_name,
+            "s3",
+            aws_access_key_id=self.config.access_key,
+            aws_secret_access_key=self.config.secret_key,
+            endpoint_url=self.config.endpoint_url,
+            region_name=self.config.region_name,
+            config=self.s3_config,
         ) as s3:
             response = await s3.list_objects_v2(
                 Bucket=bucket,
@@ -140,12 +169,12 @@ class StorageService:
             return {}
 
         async with self.s3_session.client(
-                "s3",
-                aws_access_key_id=self.config.access_key,
-                aws_secret_access_key=self.config.secret_key,
-                endpoint_url=self.config.endpoint_url,
-                region_name=self.config.region_name,
-                config=self.s3_config,
+            "s3",
+            aws_access_key_id=self.config.access_key,
+            aws_secret_access_key=self.config.secret_key,
+            endpoint_url=self.config.endpoint_url,
+            region_name=self.config.region_name,
+            config=self.s3_config,
         ) as s3:
             # Get the object and its stream
             response = await s3.get_object(Bucket=bucket, Key=key)
@@ -160,7 +189,9 @@ class StorageService:
             response["Body"] = b"".join(chunks)
             return response
 
-    def upload_text_data(self, bucket: str, key: str, data: str, overwrite: bool = False) -> list[dict[str:Any]]:
+    def upload_text_data(
+        self, bucket: str, key: str, data: str, overwrite: bool = False
+    ) -> list[dict[str:Any]]:
         policy = {
             "insertOnly": 1,
         }
@@ -170,13 +201,17 @@ class StorageService:
             policy["scope"] = f"{bucket}:{key}"
 
         token = self.auth.upload_token(bucket=bucket, key=key, policy=policy)
-        ret, info = qiniu.put_data(up_token=token, key=key, data=bytes(data, encoding="utf-8"))
+        ret, info = qiniu.put_data(
+            up_token=token, key=key, data=bytes(data, encoding="utf-8")
+        )
         if info.status_code != 200:
             raise Exception(f"Failed to upload object: {info}")
 
         return self.get_object_url(bucket, key)
 
-    def upload_local_file(self, bucket: str, key: str, file_path: str, overwrite: bool = False) -> list[dict[str:Any]]:
+    def upload_local_file(
+        self, bucket: str, key: str, file_path: str, overwrite: bool = False
+    ) -> list[dict[str:Any]]:
         policy = {
             "insertOnly": 1,
         }
@@ -222,7 +257,6 @@ class StorageService:
         }
         return any(key.lower().endswith(ext) for ext in text_extensions)
 
-
     def is_image_file(self, key: str) -> bool:
         """Determine if a file is text-based by its extension"""
         text_extensions = {
@@ -236,7 +270,6 @@ class StorageService:
             ".svg",
         }
         return any(key.lower().endswith(ext) for ext in text_extensions)
-
 
     def is_markdown_file(self, key: str) -> bool:
         text_extensions = {

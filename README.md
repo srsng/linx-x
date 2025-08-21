@@ -7,6 +7,36 @@ Server 来访问七牛云存储、智能多媒体服务等。
 
 关于访问七牛云存储详细情况请参考 [基于 MCP 使用大模型访问七牛云存储](https://developer.qiniu.com/kodo/12914/mcp-aimodel-kodo)。
 
+## 新特性：多租户支持
+
+**v1.3.0+ 新增**：支持多租户模式，不同客户端可以使用各自的 ak、sk 通过 SSE 连接，实现完全隔离的访问。
+
+### 多租户特性
+- **独立认证**：每个客户端使用自己的 ak、sk
+- **会话隔离**：每个连接独立的会话上下文
+- **并发安全**：多个客户端同时访问不会相互干扰
+- **动态配置**：通过 HTTP headers 传递认证信息
+
+### 多租户使用示例
+
+```bash
+# 客户端 1
+claude mcp add --transport sse qiniu https://your-domain.com/sse \
+  --header "X-AK: client1-ak" \
+  --header "X-SK: client1-sk" \
+  --header "X-REGION-NAME: test-region" \
+  --header "X-BUCKETS: client1-bucket"
+
+# 客户端 2
+claude mcp add --transport sse qiniu https://your-domain.com/sse \
+  --header "X-AK: client2-ak" \
+  --header "X-SK: client2-sk" \
+  --header "X-REGION-NAME: test-region" \
+  --header "X-BUCKETS: client2-bucket"
+```
+
+详细使用说明请参考 [多租户使用指南](docs/multi-tenant-usage.md)。
+
 能力集：
 - 存储
   - 获取 Bucket 列表
