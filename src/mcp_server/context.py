@@ -5,5 +5,3 @@ from typing import Optional
 current_session_id: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
     "current_session_id", default=None
 )
-
-

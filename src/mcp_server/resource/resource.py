@@ -11,6 +11,7 @@ logger = logging.getLogger(consts.LOGGER_NAME)
 
 ResourceContents = str | bytes | Iterable[ReadResourceContents]
 
+
 class ResourceProvider:
     def __init__(self, scheme: str):
         self.scheme = scheme

@@ -30,15 +30,12 @@ class _ToolImpl:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "object_url": {
-                        "type": "string", 
-                        "description": _OBJECT_URL_DESC
-                    },
+                    "object_url": {"type": "string", "description": _OBJECT_URL_DESC},
                     "percent": {
                         "type": "integer",
                         "description": "Scaling percentage, range [1,999]. For example: 90 means the image width and height are reduced to 90% of the original; 200 means the width and height are enlarged to 200% of the original.",
                         "minimum": 1,
-                        "maximum": 999
+                        "maximum": 999,
                     },
                 },
                 "required": ["object_url", "percent"],
@@ -46,7 +43,7 @@ class _ToolImpl:
         )
     )
     def image_scale_by_percent(
-            self, **kwargs
+        self, **kwargs
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         object_url = kwargs.get("object_url", "")
         percent = kwargs.get("percent", "")
@@ -60,7 +57,9 @@ class _ToolImpl:
             ]
 
         func = f"imageMogr2/thumbnail/!{percent}p"
-        object_url = utils.url_add_processing_func(auth=self.auth, url=object_url, func=func)
+        object_url = utils.url_add_processing_func(
+            auth=self.auth, url=object_url, func=func
+        )
         return [
             types.TextContent(
                 type="text",
@@ -83,28 +82,23 @@ class _ToolImpl:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "object_url": {
-                        "type": "string", 
-                        "description": _OBJECT_URL_DESC
-                    },
+                    "object_url": {"type": "string", "description": _OBJECT_URL_DESC},
                     "width": {
                         "type": "integer",
                         "description": "Specifies the width for image scaling. The image will be scaled to the specified width, and the height will be adjusted proportionally.",
-                        "minimum": 1
+                        "minimum": 1,
                     },
                     "height": {
                         "type": "integer",
                         "description": "Specifies the height for image scaling. The image will be scaled to the specified height, and the width will be adjusted proportionally.",
-                        "minimum": 1
+                        "minimum": 1,
                     },
                 },
-                "required": ["object_url"]
+                "required": ["object_url"],
             },
         )
     )
-    def image_scale_by_size(
-            self, **kwargs
-    ) -> list[types.TextContent]:
+    def image_scale_by_size(self, **kwargs) -> list[types.TextContent]:
         object_url = kwargs.get("object_url", "")
         width = kwargs.get("width", "")
         height = kwargs.get("height", "")
@@ -120,7 +114,9 @@ class _ToolImpl:
             ]
 
         func = f"imageMogr2/thumbnail/{func}"
-        object_url = utils.url_add_processing_func(auth=self.auth, url=object_url, func=func)
+        object_url = utils.url_add_processing_func(
+            auth=self.auth, url=object_url, func=func
+        )
         return [
             types.TextContent(
                 type="text",
@@ -144,21 +140,18 @@ class _ToolImpl:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "object_url": {
-                        "type": "string",
-                        "description": _OBJECT_URL_DESC
-                    },
+                    "object_url": {"type": "string", "description": _OBJECT_URL_DESC},
                     "radius_x": {
                         "type": "string",
-                        "description": "Parameter for horizontal corner size. Can use: pixel values (e.g., 200 for 200px) or percentages (e.g., !25p for 25%), all non-negative values."
+                        "description": "Parameter for horizontal corner size. Can use: pixel values (e.g., 200 for 200px) or percentages (e.g., !25p for 25%), all non-negative values.",
                     },
                     "radius_y": {
                         "type": "string",
-                        "description": "Parameter for vertical corner size. Can use: pixel values (e.g., 200 for 200px) or percentages (e.g., !25p for 25%), all non-negative values."
+                        "description": "Parameter for vertical corner size. Can use: pixel values (e.g., 200 for 200px) or percentages (e.g., !25p for 25%), all non-negative values.",
                     },
                 },
                 "required": ["object_url"],
-            }
+            },
         )
     )
     def image_round_corner(self, **kwargs) -> list[types.TextContent]:
@@ -166,18 +159,14 @@ class _ToolImpl:
         radius_x = kwargs.get("radius_x", "")
         radius_y = kwargs.get("radius_y", "")
         if object_url is None or len(object_url) == 0:
-            return [
-                types.TextContent(
-                    type="text",
-                    text="object_url is required"
-                )
-            ]
+            return [types.TextContent(type="text", text="object_url is required")]
 
-        if (radius_x is None or len(radius_x) == 0) and (radius_y is None or len(radius_y) == 0) is None:
+        if (radius_x is None or len(radius_x) == 0) and (
+            radius_y is None or len(radius_y) == 0
+        ) is None:
             return [
                 types.TextContent(
-                    type="text",
-                    text="At least one of radius_x or radius_y must be set"
+                    type="text", text="At least one of radius_x or radius_y must be set"
                 )
             ]
 
@@ -187,13 +176,17 @@ class _ToolImpl:
             radius_y = radius_x
 
         func = f"roundPic/radiusx/{radius_x}/radiusy/{radius_y}"
-        object_url = utils.url_add_processing_func(auth=self.auth, url=object_url, func=func)
+        object_url = utils.url_add_processing_func(
+            auth=self.auth, url=object_url, func=func
+        )
         return [
             types.TextContent(
                 type="text",
-                text=str({
-                    "object_url": object_url,
-                })
+                text=str(
+                    {
+                        "object_url": object_url,
+                    }
+                ),
             )
         ]
 
@@ -204,10 +197,7 @@ class _ToolImpl:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "object_url": {
-                        "type": "string",
-                        "description": _OBJECT_URL_DESC
-                    },
+                    "object_url": {"type": "string", "description": _OBJECT_URL_DESC},
                 },
                 "required": ["object_url"],
             },
@@ -216,21 +206,20 @@ class _ToolImpl:
     def image_info(self, **kwargs) -> list[types.TextContent]:
         object_url = kwargs.get("object_url", "")
         if object_url is None or len(object_url) == 0:
-            return [
-                types.TextContent(
-                    type="text",
-                    text="object_url is required"
-                )
-            ]
+            return [types.TextContent(type="text", text="object_url is required")]
 
         func = "imageInfo"
-        object_url = utils.url_add_processing_func(auth=self.auth, url=object_url, func=func)
+        object_url = utils.url_add_processing_func(
+            auth=self.auth, url=object_url, func=func
+        )
         return [
             types.TextContent(
                 type="text",
-                text=str({
-                    "object_url": object_url,
-                })
+                text=str(
+                    {
+                        "object_url": object_url,
+                    }
+                ),
             )
         ]
 

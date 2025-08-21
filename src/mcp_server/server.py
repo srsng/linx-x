@@ -44,25 +44,22 @@ def main(port: int, transport: str) -> int:
             # 从HTTP headers提取认证信息
             headers = dict(request.headers)
             config, error_msg = load_config_from_headers(headers)
-            
+
             if not config:
                 logger.error(f"Header validation failed: {error_msg}")
-                return JSONResponse(
-                    status_code=401,
-                    content={"error": error_msg}
-                )
-            
+                return JSONResponse(status_code=401, content={"error": error_msg})
+
             # 创建会话
             session_id = session_manager.create_session(
                 access_key=config.access_key,
                 secret_key=config.secret_key,
                 endpoint_url=config.endpoint_url,
                 region_name=config.region_name,
-                buckets=config.buckets
+                buckets=config.buckets,
             )
-            
+
             logger.info(f"Created session {session_id} for SSE connection")
-            
+
             try:
                 # 先设置上下文变量，再建立和运行连接，确保后续回调都能读取到
                 token = current_session_id.set(session_id)

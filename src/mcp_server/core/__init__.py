@@ -17,4 +17,3 @@ def load():
     load_cdn(cfg)
     # 智能多媒体
     load_media_processing(cfg)
-

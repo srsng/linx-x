@@ -13,6 +13,7 @@ logger = logging.getLogger(consts.LOGGER_NAME)
 
 _BUCKET_DESC = "Qiniu Cloud Storage bucket Name"
 
+
 class _ToolImpl:
     def __init__(self, storage: StorageService):
         self.storage = storage
@@ -26,7 +27,7 @@ class _ToolImpl:
                 "properties": {
                     "session_id": {
                         "type": "string",
-                        "description": "Session identifier. Automatically injected by server in SSE mode."
+                        "description": "Session identifier. Automatically injected by server in SSE mode.",
                     },
                     "prefix": {
                         "type": "string",
@@ -50,7 +51,7 @@ class _ToolImpl:
                 "properties": {
                     "session_id": {
                         "type": "string",
-                        "description": "Session identifier. Automatically injected by server in SSE mode."
+                        "description": "Session identifier. Automatically injected by server in SSE mode.",
                     },
                     "bucket": {
                         "type": "string",
@@ -86,7 +87,7 @@ class _ToolImpl:
                 "properties": {
                     "session_id": {
                         "type": "string",
-                        "description": "Session identifier. Automatically injected by server in SSE mode."
+                        "description": "Session identifier. Automatically injected by server in SSE mode.",
                     },
                     "bucket": {
                         "type": "string",
@@ -146,7 +147,7 @@ class _ToolImpl:
                     },
                 },
                 "required": ["bucket", "key", "data"],
-            }
+            },
         )
     )
     def upload_text_data(self, **kwargs) -> list[types.TextContent]:
@@ -178,7 +179,7 @@ class _ToolImpl:
                     },
                 },
                 "required": ["bucket", "key", "file_path"],
-            }
+            },
         )
     )
     def upload_local_file(self, **kwargs) -> list[types.TextContent]:
@@ -206,7 +207,7 @@ class _ToolImpl:
                     },
                 },
                 "required": ["bucket", "key", "url"],
-            }
+            },
         )
     )
     def fetch_object(self, **kwargs) -> list[types.TextContent]:
@@ -249,7 +250,7 @@ class _ToolImpl:
 # 会话感知的工具实现
 class SessionAwareToolImpl:
     """支持会话的工具实现，每个工具调用都会从当前会话获取配置"""
-    
+
     @tools.tool_meta(
         types.Tool(
             name="list_buckets",
@@ -266,7 +267,9 @@ class SessionAwareToolImpl:
             },
         )
     )
-    async def list_buckets(self, session_id: str | None = None, **kwargs) -> list[types.TextContent]:
+    async def list_buckets(
+        self, session_id: str | None = None, **kwargs
+    ) -> list[types.TextContent]:
         async with get_session_context(session_id) as session_config:
             storage = StorageService.from_session_config(session_config)
             buckets = await storage.list_buckets(**kwargs)
@@ -300,7 +303,9 @@ class SessionAwareToolImpl:
             },
         )
     )
-    async def list_objects(self, session_id: str | None = None, **kwargs) -> list[types.TextContent]:
+    async def list_objects(
+        self, session_id: str | None = None, **kwargs
+    ) -> list[types.TextContent]:
         async with get_session_context(session_id) as session_config:
             storage = StorageService.from_session_config(session_config)
             objects = await storage.list_objects(**kwargs)
@@ -326,7 +331,9 @@ class SessionAwareToolImpl:
             },
         )
     )
-    async def get_object(self, session_id: str | None = None, **kwargs) -> list[ImageContent] | list[TextContent]:
+    async def get_object(
+        self, session_id: str | None = None, **kwargs
+    ) -> list[ImageContent] | list[TextContent]:
         async with get_session_context(session_id) as session_config:
             storage = StorageService.from_session_config(session_config)
             response = await storage.get_object(**kwargs)
@@ -355,7 +362,7 @@ class SessionAwareToolImpl:
                 "properties": {
                     "session_id": {
                         "type": "string",
-                        "description": "Session identifier. Automatically injected by server in SSE mode."
+                        "description": "Session identifier. Automatically injected by server in SSE mode.",
                     },
                     "bucket": {
                         "type": "string",
@@ -378,7 +385,9 @@ class SessionAwareToolImpl:
             },
         )
     )
-    async def get_object_url(self, session_id: str | None = None, **kwargs) -> list[types.TextContent]:
+    async def get_object_url(
+        self, session_id: str | None = None, **kwargs
+    ) -> list[types.TextContent]:
         async with get_session_context(session_id) as session_config:
             storage = StorageService.from_session_config(session_config)
             urls = storage.get_object_url(**kwargs)
@@ -393,7 +402,7 @@ class SessionAwareToolImpl:
                 "properties": {
                     "session_id": {
                         "type": "string",
-                        "description": "Session identifier. Automatically injected by server in SSE mode."
+                        "description": "Session identifier. Automatically injected by server in SSE mode.",
                     },
                     "bucket": {
                         "type": "string",
@@ -416,7 +425,9 @@ class SessionAwareToolImpl:
             },
         )
     )
-    async def upload_object(self, session_id: str | None = None, **kwargs) -> list[types.TextContent]:
+    async def upload_object(
+        self, session_id: str | None = None, **kwargs
+    ) -> list[types.TextContent]:
         async with get_session_context(session_id) as session_config:
             storage = StorageService.from_session_config(session_config)
             result = await storage.upload_object(**kwargs)
@@ -426,24 +437,28 @@ class SessionAwareToolImpl:
 def register_tools(storage: StorageService):
     """注册存储工具（兼容旧版本）"""
     impl = _ToolImpl(storage)
-    tools.auto_register_tools([
-        impl.list_buckets,
-        impl.list_objects,
-        impl.get_object,
-        impl.upload_text_data,
-        impl.upload_local_file,
-        impl.fetch_object,
-        impl.get_object_url,
-    ])
+    tools.auto_register_tools(
+        [
+            impl.list_buckets,
+            impl.list_objects,
+            impl.get_object,
+            impl.upload_text_data,
+            impl.upload_local_file,
+            impl.fetch_object,
+            impl.get_object_url,
+        ]
+    )
 
 
 def register_session_aware_tools():
     """注册会话感知的存储工具"""
     impl = SessionAwareToolImpl()
-    tools.auto_register_tools([
-        impl.list_buckets,
-        impl.list_objects,
-        impl.get_object,
-        impl.get_object_url,
-        impl.upload_object,
-    ])
+    tools.auto_register_tools(
+        [
+            impl.list_buckets,
+            impl.list_objects,
+            impl.get_object,
+            impl.get_object_url,
+            impl.upload_object,
+        ]
+    )

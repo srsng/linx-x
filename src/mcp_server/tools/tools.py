@@ -37,8 +37,8 @@ def all_tools() -> List[types.Tool]:
 
 
 def register_tool(
-        meta: types.Tool,
-        func: Union[ToolFunc, AsyncToolFunc],
+    meta: types.Tool,
+    func: Union[ToolFunc, AsyncToolFunc],
 ) -> None:
     """注册工具，禁止重复名称"""
     name = meta.name

@@ -62,5 +62,5 @@ async def call_tool(name: str, arguments: dict):
             logger.debug(f"Injected session_id {session_id} into tool {name} arguments")
     except Exception as e:
         logger.warning(f"Could not get session_id for tool {name}: {e}")
-    
+
     return await tools.call_tool(name, arguments)

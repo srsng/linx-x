@@ -1,4 +1,3 @@
-
 from mcp import types
 
 from . import version
@@ -16,11 +15,12 @@ class _ToolImpl:
             inputSchema={
                 "type": "object",
                 "required": [],
-            }
+            },
         )
     )
     def version(self, **kwargs) -> list[types.TextContent]:
         return [types.TextContent(type="text", text=version.VERSION)]
+
 
 def register_tools():
     tool_impl = _ToolImpl()

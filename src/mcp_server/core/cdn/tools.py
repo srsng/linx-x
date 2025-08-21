@@ -106,7 +106,7 @@ class _ToolImpl:
                         "maxItems": 10,
                         "description": "List of directory patterns to refresh (max 10 items). Must end with '/' or '/*' to indicate directory scope",
                     },
-                }
+                },
             },
         )
     )
