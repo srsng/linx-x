@@ -1,0 +1,1 @@
+uv --directory . run qiniu-mcp-server --transport sse --port 8000
