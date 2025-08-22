@@ -11,7 +11,7 @@ from ...session import get_session_context
 
 logger = logging.getLogger(consts.LOGGER_NAME)
 
-_BUCKET_DESC = "音乐目录名称。可以使用list_objects获取目录中的音乐文件列表"
+_BUCKET_DESC = "视频目录名称。可以使用list_objects获取目录中的视频文件列表"
 
 
 class _ToolImpl:
@@ -21,7 +21,7 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="list_buckets",
-            description="返回所有可用的音乐目录。返回为空说明当前没有可用的音乐目录",
+            description="返回所有可用的视频目录。返回为空说明当前没有可用的视频目录",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -31,7 +31,7 @@ class _ToolImpl:
                     },
                     "prefix": {
                         "type": "string",
-                        "description": "音乐目录前缀。返回的音乐目录名称会根据这个前缀进行过滤，只有符合前缀的音乐目录才会被返回。",
+                        "description": "视频目录前缀。返回的视频目录名称会根据这个前缀进行过滤，只有符合前缀的视频目录才会被返回。",
                     },
                 },
                 "required": [],
@@ -45,7 +45,7 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="list_objects",
-            description="返回音乐目录下的音乐文件列表，当实际数量少于max_keys时，说明所有音乐都列出来了。",
+            description="返回视频目录下的视频文件列表，当实际数量少于max_keys时，说明所有视频都列出来了。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -59,7 +59,7 @@ class _ToolImpl:
                     },
                     "max_keys": {
                         "type": "integer",
-                        "description": "一次最多返回多少首音乐，默认100首，最大500首",
+                        "description": "一次最多返回多少首视频，默认100首，最大500首",
                     },
                     "prefix": {
                         "type": "string",
@@ -81,7 +81,7 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="get_object",
-            description="获取音乐目录下的音乐文件内容。在GetObject请求中，指定要获取的音乐文件的完整键名。",
+            description="获取视频目录下的视频文件内容。在GetObject请求中，指定要获取的视频文件的完整键名。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -95,7 +95,7 @@ class _ToolImpl:
                     },
                     "key": {
                         "type": "string",
-                        "description": "要获取的音乐文件的完整键名",
+                        "description": "要获取的视频文件的完整键名",
                     },
                 },
                 "required": ["bucket", "key"],
@@ -125,7 +125,7 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="upload_text_data",
-            description="将文本数据上传到音乐目录下的音乐文件。在UploadTextData请求中，指定要上传的音乐文件的完整键名。",
+            description="将文本数据上传到视频目录下的视频文件。在UploadTextData请求中，指定要上传的视频文件的完整键名。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -135,15 +135,15 @@ class _ToolImpl:
                     },
                     "key": {
                         "type": "string",
-                        "description": "要上传的音乐文件的完整键名",
+                        "description": "要上传的视频文件的完整键名",
                     },
                     "data": {
                         "type": "string",
-                        "description": "要上传的音乐文件的内容",
+                        "description": "要上传的视频文件的内容",
                     },
                     "overwrite": {
                         "type": "boolean",
-                        "description": "如果音乐目录下已经存在同名的音乐文件，是否覆盖",
+                        "description": "如果视频目录下已经存在同名的视频文件，是否覆盖",
                     },
                 },
                 "required": ["bucket", "key", "data"],
@@ -157,7 +157,7 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="upload_local_file",
-            description="将本地文件上传到音乐目录下的音乐文件。在UploadLocalFile请求中，指定要上传的音乐文件的完整键名。",
+            description="将本地文件上传到视频目录下的视频文件。在UploadLocalFile请求中，指定要上传的视频文件的完整键名。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -167,7 +167,7 @@ class _ToolImpl:
                     },
                     "key": {
                         "type": "string",
-                        "description": "要上传的音乐文件的完整键名",
+                        "description": "要上传的视频文件的完整键名",
                     },
                     "file_path": {
                         "type": "string",
@@ -175,7 +175,7 @@ class _ToolImpl:
                     },
                     "overwrite": {
                         "type": "boolean",
-                        "description": "如果音乐目录下已经存在同名的音乐文件，是否覆盖",
+                        "description": "如果视频目录下已经存在同名的视频文件，是否覆盖",
                     },
                 },
                 "required": ["bucket", "key", "file_path"],
@@ -189,7 +189,7 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="fetch_object",
-            description="从指定的URL获取文件内容，并将其上传到音乐目录下的音乐文件。在FetchObject请求中，指定要上传的音乐文件的完整键名。",
+            description="从指定的URL获取文件内容，并将其上传到视频目录下的视频文件。在FetchObject请求中，指定要上传的视频文件的完整键名。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -199,7 +199,7 @@ class _ToolImpl:
                     },
                     "key": {
                         "type": "string",
-                        "description": "要上传的音乐文件的完整键名",
+                        "description": "要上传的视频文件的完整键名",
                     },
                     "url": {
                         "type": "string",
@@ -217,7 +217,7 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="get_object_url",
-            description="获取音乐目录下的音乐文件的下载URL。在GetObjectUrl请求中，指定要获取的音乐文件的完整键名。",
+            description="获取视频目录下的视频文件的下载URL。在GetObjectUrl请求中，指定要获取的视频文件的完整键名。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -227,7 +227,7 @@ class _ToolImpl:
                     },
                     "key": {
                         "type": "string",
-                        "description": "要获取的音乐文件的完整键名",
+                        "description": "要获取的视频文件的完整键名",
                     },
                     "disable_ssl": {
                         "type": "boolean",
@@ -254,13 +254,13 @@ class SessionAwareToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="list_buckets",
-            description="列出当前会话配置的所有音乐目录。",
+            description="列出当前会话配置的所有视频目录。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "prefix": {
                         "type": "string",
-                        "description": "音乐目录前缀。列出的音乐目录将根据此前缀进行过滤，仅输出匹配前缀的音乐目录。",
+                        "description": "视频目录前缀。列出的视频目录将根据此前缀进行过滤，仅输出匹配前缀的视频目录。",
                     },
                 },
                 "required": [],
@@ -278,7 +278,7 @@ class SessionAwareToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="list_objects",
-            description="列出当前会话配置的音乐目录下的所有音乐文件。",
+            description="列出当前会话配置的视频目录下的所有视频文件。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -314,7 +314,7 @@ class SessionAwareToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="get_object",
-            description="从当前会话配置的音乐目录下获取指定的音乐文件内容。",
+            description="从当前会话配置的视频目录下获取指定的视频文件内容。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -356,7 +356,7 @@ class SessionAwareToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="get_object_url",
-            description="获取可用的音乐目录下指定音乐文件的下载URL。",
+            description="获取可用的视频目录下指定视频文件的下载URL。",
             inputSchema={
                 "type": "object",
                 "properties": {
