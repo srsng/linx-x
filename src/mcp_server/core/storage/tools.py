@@ -11,7 +11,7 @@ from ...session import get_session_context
 
 logger = logging.getLogger(consts.LOGGER_NAME)
 
-_BUCKET_DESC = "Qiniu Cloud Storage bucket Name"
+_BUCKET_DESC = "音乐目录名称"
 
 
 class _ToolImpl:
@@ -21,17 +21,17 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="list_buckets",
-            description="Return the Bucket you configured based on the conditions.",
+            description="返回所有可用的音乐目录。返回为空说明当前没有可用的音乐目录",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "session_id": {
                         "type": "string",
-                        "description": "Session identifier. Automatically injected by server in SSE mode.",
+                        "description": "会话ID，自动注入，无需填写",
                     },
                     "prefix": {
                         "type": "string",
-                        "description": "Bucket prefix. The listed Buckets will be filtered based on this prefix, and only those matching the prefix will be output.",
+                        "description": "音乐目录前缀。返回的音乐目录名称会根据这个前缀进行过滤，只有符合前缀的音乐目录才会被返回。",
                     },
                 },
                 "required": [],
@@ -45,13 +45,13 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="list_objects",
-            description="List objects in Qiniu Cloud, list a part each time, you can set start_after to continue listing, when the number of listed objects is less than max_keys, it means that all files are listed. start_after can be the key of the last file in the previous listing.",
+            description="返回音乐目录下的音乐文件列表，当实际数量少于max_keys时，说明所有音乐都列出来了。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "session_id": {
                         "type": "string",
-                        "description": "Session identifier. Automatically injected by server in SSE mode.",
+                        "description": "会话ID，自动注入，无需填写",
                     },
                     "bucket": {
                         "type": "string",
@@ -59,7 +59,7 @@ class _ToolImpl:
                     },
                     "max_keys": {
                         "type": "integer",
-                        "description": "Sets the max number of keys returned, default: 20",
+                        "description": "一次最多返回多少首音乐，默认100首，最大500首",
                     },
                     "prefix": {
                         "type": "string",
@@ -81,13 +81,13 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="get_object",
-            description="Get an object contents from Qiniu Cloud bucket. In the GetObject request, specify the full key name for the object.",
+            description="获取音乐目录下的音乐文件内容。在GetObject请求中，指定要获取的音乐文件的完整键名。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "session_id": {
                         "type": "string",
-                        "description": "Session identifier. Automatically injected by server in SSE mode.",
+                        "description": "会话ID，自动注入，无需填写",
                     },
                     "bucket": {
                         "type": "string",
@@ -95,7 +95,7 @@ class _ToolImpl:
                     },
                     "key": {
                         "type": "string",
-                        "description": "Key of the object to get.",
+                        "description": "要获取的音乐文件的完整键名",
                     },
                 },
                 "required": ["bucket", "key"],
@@ -125,7 +125,7 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="upload_text_data",
-            description="Upload text data to Qiniu bucket.",
+            description="将文本数据上传到音乐目录下的音乐文件。在UploadTextData请求中，指定要上传的音乐文件的完整键名。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -135,15 +135,15 @@ class _ToolImpl:
                     },
                     "key": {
                         "type": "string",
-                        "description": "The key under which a file is saved in Qiniu Cloud Storage serves as the unique identifier for the file within that space, typically using the filename.",
+                        "description": "要上传的音乐文件的完整键名",
                     },
                     "data": {
                         "type": "string",
-                        "description": "The data to upload.",
+                        "description": "要上传的音乐文件的内容",
                     },
                     "overwrite": {
                         "type": "boolean",
-                        "description": "Whether to overwrite the existing object if it already exists.",
+                        "description": "如果音乐目录下已经存在同名的音乐文件，是否覆盖",
                     },
                 },
                 "required": ["bucket", "key", "data"],
@@ -157,7 +157,7 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="upload_local_file",
-            description="Upload a local file to Qiniu bucket.",
+            description="将本地文件上传到音乐目录下的音乐文件。在UploadLocalFile请求中，指定要上传的音乐文件的完整键名。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -167,15 +167,15 @@ class _ToolImpl:
                     },
                     "key": {
                         "type": "string",
-                        "description": "The key under which a file is saved in Qiniu Cloud Storage serves as the unique identifier for the file within that space, typically using the filename.",
+                        "description": "要上传的音乐文件的完整键名",
                     },
                     "file_path": {
                         "type": "string",
-                        "description": "The file path of file to upload.",
+                        "description": "要上传的本地文件的路径",
                     },
                     "overwrite": {
                         "type": "boolean",
-                        "description": "Whether to overwrite the existing object if it already exists.",
+                        "description": "如果音乐目录下已经存在同名的音乐文件，是否覆盖",
                     },
                 },
                 "required": ["bucket", "key", "file_path"],
@@ -189,7 +189,7 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="fetch_object",
-            description="Fetch a http object to Qiniu bucket.",
+            description="从指定的URL获取文件内容，并将其上传到音乐目录下的音乐文件。在FetchObject请求中，指定要上传的音乐文件的完整键名。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -199,11 +199,11 @@ class _ToolImpl:
                     },
                     "key": {
                         "type": "string",
-                        "description": "The key under which a file is saved in Qiniu Cloud Storage serves as the unique identifier for the file within that space, typically using the filename.",
+                        "description": "要上传的音乐文件的完整键名",
                     },
                     "url": {
                         "type": "string",
-                        "description": "The URL of the object to fetch.",
+                        "description": "要获取的文件的URL",
                     },
                 },
                 "required": ["bucket", "key", "url"],
@@ -217,7 +217,7 @@ class _ToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="get_object_url",
-            description="Get the file download URL, and note that the Bucket where the file is located must be bound to a domain name. If using Qiniu Cloud test domain, HTTPS access will not be available, and users need to make adjustments for this themselves.",
+            description="获取音乐目录下的音乐文件的下载URL。在GetObjectUrl请求中，指定要获取的音乐文件的完整键名。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -227,15 +227,15 @@ class _ToolImpl:
                     },
                     "key": {
                         "type": "string",
-                        "description": "Key of the object to get.",
+                        "description": "要获取的音乐文件的完整键名",
                     },
                     "disable_ssl": {
                         "type": "boolean",
-                        "description": "Whether to disable SSL. By default, it is not disabled (HTTP protocol is used). If disabled, the HTTP protocol will be used.",
+                        "description": "是否禁用SSL。默认不禁用（使用HTTP协议）。如果禁用，将使用HTTP协议。",
                     },
                     "expires": {
                         "type": "integer",
-                        "description": "Token expiration time (in seconds) for download links. When the bucket is private, a signed Token is required to access file objects. Public buckets do not require Token signing.",
+                        "description": "下载链接的过期时间（单位：秒）。当桶设置为私有时，需要使用签名Token来访问文件对象。公共桶不需要签名Token。",
                     },
                 },
                 "required": ["bucket", "key"],
@@ -254,13 +254,13 @@ class SessionAwareToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="list_buckets",
-            description="Return the Bucket you configured based on the conditions.",
+            description="列出当前会话配置的所有音乐目录。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "prefix": {
                         "type": "string",
-                        "description": "Bucket prefix. The listed Buckets will be filtered based on this prefix, and only those matching the prefix will be output.",
+                        "description": "音乐目录前缀。列出的音乐目录将根据此前缀进行过滤，仅输出匹配前缀的音乐目录。",
                     },
                 },
                 "required": [],
@@ -278,7 +278,7 @@ class SessionAwareToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="list_objects",
-            description="List objects in Qiniu Cloud, list a part each time, you can set start_after to continue listing, when the number of listed objects is less than max_keys, it means that all files are listed. start_after can be the key of the last file in the previous listing.",
+            description="列出当前会话配置的音乐目录下的所有音乐文件。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -288,7 +288,7 @@ class SessionAwareToolImpl:
                     },
                     "max_keys": {
                         "type": "integer",
-                        "description": "Sets the max number of keys returned, default: 20",
+                        "description": "最大返回的文件对象数量，默认为100，最大为500",
                     },
                     "prefix": {
                         "type": "string",
@@ -314,7 +314,7 @@ class SessionAwareToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="get_object",
-            description="Get an object contents from Qiniu Cloud bucket. In the GetObject request, specify the full key name for the object.",
+            description="从当前会话配置的音乐目录下获取指定的音乐文件内容。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -356,13 +356,13 @@ class SessionAwareToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="get_object_url",
-            description="Generate a download URL for an object in Qiniu Cloud bucket. Note that the bucket must have a domain bound, and the Qiniu Cloud test domain does not support HTTPS, so users need to handle it as HTTP themselves.",
+            description="获取可用的音乐目录下指定音乐文件的下载URL。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "session_id": {
                         "type": "string",
-                        "description": "Session identifier. Automatically injected by server in SSE mode.",
+                        "description": "会话ID。在SSE模式下自动注入。",
                     },
                     "bucket": {
                         "type": "string",
