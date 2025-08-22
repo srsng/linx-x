@@ -11,7 +11,7 @@ from ...session import get_session_context
 
 logger = logging.getLogger(consts.LOGGER_NAME)
 
-_BUCKET_DESC = "音乐目录名称"
+_BUCKET_DESC = "音乐目录名称，可以用于list_objects等获取音乐文件键名"
 
 
 class _ToolImpl:
