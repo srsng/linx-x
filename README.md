@@ -13,7 +13,7 @@
 
 ## 工具
 
-1. 音乐文件列表 `get_music_list`
+1. 音乐文件列表 `list_music`
     - 描述: 获取音乐文件列表，可以使用`prefix`根据路径过滤，返回音乐文件的key（名称，路径，还可以用于获取下载url）列表
     - 参数:
       - `max_keys` 最大返回的文件对象数量，默认为100，最大为500
@@ -22,36 +22,15 @@
     - 输出: 音乐文件列表，包含`Bucket`, `Key`, `Size`等信息
 
 2. 音乐播放链接 `get_music_url`
-    - 描述: 使用通过get_music_list获取到的音乐文件key，获取指定音乐文件的播放URL。可以使用此URL直接在音乐播放器中播放音乐，无需下载完整文件
+    - 描述: 使用通过`list_music`获取到的音乐文件key，获取指定音乐文件的播放URL。可以使用此URL直接在音乐播放器中播放音乐，无需下载完整文件
     - 参数:
-      - `key` 音乐对应的key，通过get_music_list获得
+      - `key` 音乐对应的key，通过`list_music`获得
       - `expires` 链接有效期，单位秒，默认3600秒
     - 输出: 播放URL信息，包含`bucket`, `key`, `url`, `size`, `mime_type`等
 
-## 功能特性
-
-### 音乐文件管理
-
-- **音乐文件列表**：获取和展示音乐文件，支持分页浏览
-- **音乐播放链接**：生成安全的音乐文件播放URL
-- **格式支持**：支持 MP3、FLAC、WAV、AAC、OGG 等主流音频格式
-
-### 智能搜索与过滤
-
-- **文件名搜索**：根据音乐文件名快速定位
-- **路径过滤**：按目录结构筛选音乐文件
-- **格式筛选**：按音频格式类型过滤文件
-
-### 性能优化
-
-- **预加载缓存**：连接时自动预加载所有音乐文件信息
-- **分页展示**：大量音乐文件的高效分页显示
-- **并发处理**：多目录并发扫描，快速构建音乐库
-
 ## 环境要求
 
-- Python 3.12 或更高版本
-- uv 包管理器
+- uv
 
 如果还没有安装 uv，可以使用以下命令安装：
 
@@ -122,19 +101,6 @@ http://localhost:8000/sse
 
 ```bash
 uv --directory . run music-mcp-server --transport sse --port 8000
-```
-
-也可以在你的客户端中配置（如Claude for Desktop、Cursor），部分客户端下可能需要做一些格式化调整。
-
-```json
-{
-  "mcpServers": {
-    "music-mcp-server": {
-      "command": "uv",
-      "args": ["--directory", ".", "run", "music-mcp-server", "--transport", "stdio"]
-    }
-  }
-}
 ```
 
 ### 配置
