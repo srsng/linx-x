@@ -2,22 +2,37 @@
 
 ## 概述
 
-基于七牛云存储构建的音乐网盘 MCP Server，为用户提供智能化的音乐文件管理体验。
+基于云存储构建的音乐网盘 MCP Server，为用户提供智能化的音乐文件管理体验。
 
 ### 多租户特性
 
-- **独立认证**：每个客户端使用自己的 ak、sk
+- **独立认证**：每个客户端独立验证
 - **会话隔离**：每个连接独立的会话上下文
 - **并发安全**：多个客户端同时访问不会相互干扰
 - **动态配置**：通过 HTTP headers 传递认证信息
+
+## 工具
+
+1. 音乐文件列表 `get_music_list`
+    - 描述: 获取音乐文件列表，可以使用`prefix`根据路径过滤，返回音乐文件的key（名称，路径，还可以用于获取下载url）列表
+    - 参数:
+      - `max_keys` 最大返回的文件对象数量，默认为100，最大为500
+      - `prefix` 音乐文件名前缀过滤。只返回路径以此前缀开头的音乐文件
+      - `start_after` 分页起始位置。从指定的音乐文件名之后开始列出，用于实现分页浏览
+    - 输出: 音乐文件列表，包含`Bucket`, `Key`, `Size`等信息
+
+2. 音乐播放链接 `get_music_url`
+    - 描述: 使用通过get_music_list获取到的音乐文件key，获取指定音乐文件的播放URL。可以使用此URL直接在音乐播放器中播放音乐，无需下载完整文件
+    - 参数:
+      - `key` 音乐对应的key，通过get_music_list获得
+      - `expires` 链接有效期，单位秒，默认3600秒
+    - 输出: 播放URL信息，包含`bucket`, `key`, `url`, `size`, `mime_type`等
 
 ## 功能特性
 
 ### 音乐文件管理
 
-- **音乐目录浏览**：获取所有音乐存储目录列表
 - **音乐文件列表**：获取和展示音乐文件，支持分页浏览
-- **音乐文件上传**：支持本地音乐文件上传到云端
 - **音乐播放链接**：生成安全的音乐文件播放URL
 - **格式支持**：支持 MP3、FLAC、WAV、AAC、OGG 等主流音频格式
 
@@ -63,13 +78,30 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 
 具体安装方式参考 [uv 安装](https://docs.astral.sh/uv/getting-started/installation/#pypi)
 
-## 启动
+## 开始
 
-1. 克隆仓库
+任意支持MCP协议的客户端（如Claude for Desktop、Cursor、Cherry Studio 和 Cline等）都可以简单且快速的接入音乐网盘MCP Server。
 
-  <!-- ```bash
+在传输方式上，音乐网盘MCP Server支持：
 
-  ``` -->
+- HTTP 远程传输
+  - [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events)（SSE）
+
+下面提供通用的接入配置，客户端接入的配置示例则在最后采用Cursor作为接入演示。请根据您客户端的兼容性选择合适的传输方式进行接入。
+
+### HTTP 远程传输接入
+
+#### SSE 地址
+
+```shell
+http://localhost:8000/sse
+```
+
+### stdio 本地传输接入
+
+#### python（pip、uvx）
+
+1. 克隆仓库并进入目录
 
 2. 创建并激活虚拟环境：
 
@@ -86,15 +118,26 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
   uv pip install -e .
   ```
 
-4. 启动
+4. 启动服务器
 
 ```bash
 uv --directory . run music-mcp-server --transport sse --port 8000
 ```
 
-5. 连接
+也可以在你的客户端中配置（如Claude for Desktop、Cursor），部分客户端下可能需要做一些格式化调整。
 
-4. 配置
+```json
+{
+  "mcpServers": {
+    "music-mcp-server": {
+      "command": "uv",
+      "args": ["--directory", ".", "run", "music-mcp-server", "--transport", "stdio"]
+    }
+  }
+}
+```
+
+### 配置
 
 本音乐网盘服务器采用会话感知模式，通过HTTP头部传递认证信息，无需配置环境变量。
 客户端连接时需要在HTTP头部提供以下认证信息：
@@ -103,6 +146,26 @@ uv --directory . run music-mcp-server --transport sse --port 8000
 - `X-SK`: 七牛云Secret Key  
 - `X-REGION-NAME`: 音乐存储区域名称
 - `X-BUCKETS`: 音乐存储桶列表（逗号分隔，如：music-library,albums,playlists）
+
+### Cursor 平台远程接入音乐网盘MCP Server
+
+对于SSE接入，需在配置文件中添加
+
+```json
+{
+  "mcpServers": {
+    "music-mcp-server-SSE": {
+      "url": "http://localhost:8000/sse",
+      "headers": {
+        "X-AK": "your-access-key",
+        "X-SK": "your-secret-key",
+        "X-REGION-NAME": "your-region",
+        "X-BUCKETS": "bucket1,bucket2"
+      }
+    }
+  }
+}
+```
 
 ## 开发
 
