@@ -1,15 +1,8 @@
-# Qiniu MCP Server
+# Music MCP Server
 
 ## 概述
 
-基于七牛云产品构建的 Model Context Protocol (MCP) Server，支持用户在 AI 大模型客户端的上下文中通过该 MCP
-Server 来访问七牛云存储、智能多媒体服务等。
-
-关于访问七牛云存储详细情况请参考 [基于 MCP 使用大模型访问七牛云存储](https://developer.qiniu.com/kodo/12914/mcp-aimodel-kodo)。
-
-## 新特性：多租户支持
-
-**v1.3.0+ 新增**：支持多租户模式，不同客户端可以使用各自的 ak、sk 通过 SSE 连接，实现完全隔离的访问。
+基于七牛云存储构建的音乐网盘 MCP Server，为用户提供智能化的音乐文件管理体验。
 
 ### 多租户特性
 
@@ -18,40 +11,27 @@ Server 来访问七牛云存储、智能多媒体服务等。
 - **并发安全**：多个客户端同时访问不会相互干扰
 - **动态配置**：通过 HTTP headers 传递认证信息
 
-### 多租户使用示例
+## 功能特性
 
-```bash
-# 客户端 1
-claude mcp add --transport sse qiniu https://your-domain.com/sse \
-  --header "X-AK: client1-ak" \
-  --header "X-SK: client1-sk" \
-  --header "X-REGION-NAME: test-region" \
-  --header "X-BUCKETS: client1-bucket"
+### 音乐文件管理
 
-# 客户端 2
-claude mcp add --transport sse qiniu https://your-domain.com/sse \
-  --header "X-AK: client2-ak" \
-  --header "X-SK: client2-sk" \
-  --header "X-REGION-NAME: test-region" \
-  --header "X-BUCKETS: client2-bucket"
-```
+- **音乐目录浏览**：获取所有音乐存储目录列表
+- **音乐文件列表**：获取和展示音乐文件，支持分页浏览
+- **音乐文件上传**：支持本地音乐文件上传到云端
+- **音乐播放链接**：生成安全的音乐文件播放URL
+- **格式支持**：支持 MP3、FLAC、WAV、AAC、OGG 等主流音频格式
 
-详细使用说明请参考 [多租户使用指南](docs/multi-tenant-usage.md)。
+### 智能搜索与过滤
 
-能力集：
+- **文件名搜索**：根据音乐文件名快速定位
+- **路径过滤**：按目录结构筛选音乐文件
+- **格式筛选**：按音频格式类型过滤文件
 
-- 存储
-  - 获取 Bucket 列表
-  - 获取 Bucket 中的文件列表
-  - 上传本地文件，以及给出文件内容进行上传
-  - 读取文件内容
-  - 获取文件下载链接
-- 智能多媒体
-  - 图片缩放
-  - 图片切圆角
-- CDN
-  - 根据链接刷新文件
-  - 根据链接预取文件
+### 性能优化
+
+- **预加载缓存**：连接时自动预加载所有音乐文件信息
+- **分页展示**：大量音乐文件的高效分页显示
+- **并发处理**：多目录并发扫描，快速构建音乐库
 
 ## 环境要求
 
@@ -83,59 +63,13 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 
 具体安装方式参考 [uv 安装](https://docs.astral.sh/uv/getting-started/installation/#pypi)
 
-## 在 Cline 中使用
+## 启动
 
-步骤：
+1. 克隆仓库
 
-1. 在 vscode 下载 Cline 插件（下载后 Cline 插件后在侧边栏会增加 Cline 的图标）
-2. 配置大模型
-3. 配置 qiniu MCP
-    1. 点击 Cline 图标进入 Cline 插件，选择 MCP Server 模块
-    2. 选择 installed，点击 Advanced MCP Settings 配置 MCP Server，参考下面配置信息
+  <!-- ```bash
 
-   ```
-   {
-     "mcpServers": {
-       "qiniu": {
-         "command": "uvx",
-         "args": [
-           "qiniu-mcp-server"
-         ],
-         "env": {
-           "QINIU_ACCESS_KEY": "YOUR_ACCESS_KEY",
-           "QINIU_SECRET_KEY": "YOUR_SECRET_KEY",
-           "QINIU_REGION_NAME": "YOUR_REGION_NAME",
-           "QINIU_ENDPOINT_URL": "YOUR_ENDPOINT_URL",
-           "QINIU_BUCKETS": "YOUR_BUCKET_A,YOUR_BUCKET_B"
-        },
-         "disabled": false
-       }
-     }
-   }
-   ```
-
-    3. 点击 qiniu MCP Server 的链接开关进行连接
-4. 在 Cline 中创建一个聊天窗口，此时我们可以和 AI 进行交互来使用 qiniu-mcp-server ，下面给出几个示例：
-    - 列举 qiniu 的资源信息
-    - 列举 qiniu 中所有的 Bucket
-    - 列举 qiniu 中 xxx Bucket 的文件
-    - 读取 qiniu xxx Bucket 中 yyy 的文件内容
-    - 对 qiniu xxx Bucket 中 yyy 的图片切个宽200像素的圆角
-    - 刷新下 qiniu 的这个 CDN 链接：<https://developer.qiniu.com/test.txt>
-
-注：
-cursor 中创建 MCP Server 可直接使用上述配置。
-claude 中使用时可能会遇到：Error: spawn uvx ENOENT 错误，解决方案：command 中 参数填写 uvx 的绝对路径，eg: /usr/local/bin/uvx
-
-## 开发
-
-1. 克隆仓库：
-
-  ```bash
-  # 克隆项目并进入目录
-  git clone git@github.com:qiniu/qiniu-mcp-server.git
-  cd qiniu-mcp-server
-  ```
+  ``` -->
 
 2. 创建并激活虚拟环境：
 
@@ -152,15 +86,25 @@ claude 中使用时可能会遇到：Error: spawn uvx ENOENT 错误，解决方�
   uv pip install -e .
   ```
 
+4. 启动
+
+```bash
+uv --directory . run music-mcp-server --transport sse --port 8000
+```
+
+5. 连接
+
 4. 配置
 
-本服务器采用会话感知模式，通过HTTP头部传递认证信息，无需配置环境变量。
+本音乐网盘服务器采用会话感知模式，通过HTTP头部传递认证信息，无需配置环境变量。
 客户端连接时需要在HTTP头部提供以下认证信息：
 
 - `X-AK`: 七牛云Access Key
 - `X-SK`: 七牛云Secret Key  
-- `X-REGION-NAME`: 区域名称
-- `X-BUCKETS`: 存储桶列表（逗号分隔）
+- `X-REGION-NAME`: 音乐存储区域名称
+- `X-BUCKETS`: 音乐存储桶列表（逗号分隔，如：music-library,albums,playlists）
+
+## 开发
 
 扩展功能，首先在 core 目录下新增一个业务包目录（eg: 存储 -> storage），在此业务包目录下完成功能拓展。
 在业务包目录下的 `__init__.py` 文件中定义 load 函数用于注册业务工具或者资源，最后在 `core` 目录下的 `__init__.py`
@@ -174,29 +118,4 @@ core
     ├── resource.py # 存储资源扩展
     ├── storage.py # 存储工具类
     └── tools.py # 存储工具扩展
-```
-
-## 测试
-
-### 使用 Model Control Protocol Inspector 测试
-
-强烈推荐使用 [Model Control Protocol Inspector](https://github.com/modelcontextprotocol/inspector) 进行测试。
-
-```shell
-# node 版本为：v22.4.0
-npx @modelcontextprotocol/inspector uv --directory . run qiniu-mcp-server
-```
-
-### 本地启动 MCP Server 示例
-
-1. 使用标准输入输出（stdio）模式启动（默认）：
-
-```bash
-uv --directory . run qiniu-mcp-server
-```
-
-2. 使用 SSE 模式启动（用于 Web 应用）：
-
-```bash
-uv --directory . run qiniu-mcp-server --transport sse --port 8000
 ```

@@ -10,12 +10,16 @@ from .session import session_manager
 from .context import current_session_id
 from .config.config import load_config_from_headers
 
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(consts.LOGGER_NAME)
 logger.info("Starting MCP server")
 
 SAMPLE_RESOURCES = {
-    "greeting": "Hello! This is a MCP Server for Qiniu.",
-    "help": "This server provides a few resources and tools for Qiniu.",
+    "greeting": "Hello! This is a MCP Server for music.",
+    "help": "This server provides a few resources and tools for music.",
     "about": "This is the MCP server implementation.",
 }
 

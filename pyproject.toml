@@ -1,7 +1,7 @@
 [project]
 name = "music-mcp-server"
 version = "1.2.3"
-description = "A MCP server project"
+description = "Music MCP Server - 基于七牛云的智能音乐网盘服务"
 requires-python = ">=3.12"
 authors = []
 keywords = ["music", "mcp", "llm"]

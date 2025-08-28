@@ -1,1 +1,1 @@
-LOGGER_NAME = "qiniu-mcp"
+LOGGER_NAME = "music-mcp"

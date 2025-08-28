@@ -31,7 +31,14 @@ class StorageService:
 
     @classmethod
     def from_session_config(cls, session_config: SessionConfig) -> "StorageService":
-        """从会话配置创建StorageService实例"""
+        """从会话配置创建StorageService实例
+
+        Args:
+            session_config: 会话配置对象，包含访问密钥、端点等信息
+
+        Returns:
+            StorageService实例
+        """
         cfg = config.Config(
             access_key=session_config.access_key,
             secret_key=session_config.secret_key,

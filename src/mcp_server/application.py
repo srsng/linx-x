@@ -18,7 +18,7 @@ from .context import current_session_id
 logger = logging.getLogger(consts.LOGGER_NAME)
 
 core.load()
-server = Server("qiniu-mcp-server")
+server = Server("music-mcp-server")
 
 
 @server.set_logging_level()
