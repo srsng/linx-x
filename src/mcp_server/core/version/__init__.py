@@ -1,8 +1,7 @@
 from .tools import register_tools
-from ...config import config
 
 
-def load(cfg: config.Config):
+def load():
     register_tools()
 
 

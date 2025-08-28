@@ -11,14 +11,15 @@ from .storage import StorageService
 from ...consts import consts
 from ...resource import resource
 from ...resource.resource import ResourceContents
+from ...session import get_session_context
+from ...context import current_session_id
 
 logger = logging.getLogger(consts.LOGGER_NAME)
 
 
-class _ResourceProvider(resource.ResourceProvider):
-    def __init__(self, storage: StorageService):
+class _SessionAwareResourceProvider(resource.ResourceProvider):
+    def __init__(self):
         super().__init__("s3")
-        self.storage = storage
 
     async def list_resources(
         self, prefix: str = "", max_keys: int = 20, **kwargs
@@ -31,62 +32,66 @@ class _ResourceProvider(resource.ResourceProvider):
         """
         resources = []
         logger.debug("Starting to list resources")
-        logger.debug(f"Configured buckets: {self.storage.config.buckets}")
 
-        try:
-            # Get limited number of buckets
-            buckets = await self.storage.list_buckets(prefix)
+        session_id = current_session_id.get()
+        async with get_session_context(session_id) as session_config:
+            storage = StorageService.from_session_config(session_config)
+            logger.debug(f"Configured buckets: {storage.config.buckets}")
 
-            # limit concurrent operations
-            async def process_bucket(bucket):
-                bucket_name = bucket["Name"]
-                logger.debug(f"Processing bucket: {bucket_name}")
+            try:
+                # Get limited number of buckets
+                buckets = await storage.list_buckets(prefix)
 
-                try:
-                    # List objects in the bucket with a reasonable limit
-                    objects = await self.storage.list_objects(
-                        bucket_name, max_keys=max_keys
-                    )
+                # limit concurrent operations
+                async def process_bucket(bucket):
+                    bucket_name = bucket["Name"]
+                    logger.debug(f"Processing bucket: {bucket_name}")
 
-                    for obj in objects:
-                        if "Key" in obj and not obj["Key"].endswith("/"):
-                            object_key = obj["Key"]
-                            if self.storage.is_markdown_file(object_key):
-                                mime_type = "text/markdown"
-                            elif self.storage.is_image_file(object_key):
-                                mime_type = "image/png"
-                            else:
-                                mime_type = "text/plain"
+                    try:
+                        # List objects in the bucket with a reasonable limit
+                        objects = await storage.list_objects(
+                            bucket_name, max_keys=max_keys
+                        )
 
-                            resource_entry = types.Resource(
-                                uri=f"s3://{bucket_name}/{object_key}",
-                                name=object_key,
-                                mimeType=mime_type,
-                                description=str(obj),
-                            )
-                            resources.append(resource_entry)
-                            logger.debug(f"Added resource: {resource_entry.uri}")
+                        for obj in objects:
+                            if "Key" in obj and not obj["Key"].endswith("/"):
+                                object_key = obj["Key"]
+                                if storage.is_markdown_file(object_key):
+                                    mime_type = "text/markdown"
+                                elif storage.is_image_file(object_key):
+                                    mime_type = "image/png"
+                                else:
+                                    mime_type = "text/plain"
 
-                except Exception as e:
-                    logger.error(
-                        f"Error listing objects in bucket {bucket_name}: {str(e)}"
-                    )
+                                resource_entry = types.Resource(
+                                    uri=f"s3://{bucket_name}/{object_key}",
+                                    name=object_key,
+                                    mimeType=mime_type,
+                                    description=str(obj),
+                                )
+                                resources.append(resource_entry)
+                                logger.debug(f"Added resource: {resource_entry.uri}")
 
-            # Use semaphore to limit concurrent bucket processing
-            semaphore = asyncio.Semaphore(3)  # Limit concurrent bucket processing
+                    except Exception as e:
+                        logger.error(
+                            f"Error listing objects in bucket {bucket_name}: {str(e)}"
+                        )
 
-            async def process_bucket_with_semaphore(bucket):
-                async with semaphore:
-                    await process_bucket(bucket)
+                # Use semaphore to limit concurrent bucket processing
+                semaphore = asyncio.Semaphore(3)  # Limit concurrent bucket processing
 
-            # Process buckets concurrently
-            await asyncio.gather(
-                *[process_bucket_with_semaphore(bucket) for bucket in buckets]
-            )
+                async def process_bucket_with_semaphore(bucket):
+                    async with semaphore:
+                        await process_bucket(bucket)
 
-        except Exception as e:
-            logger.error(f"Error listing buckets: {str(e)}")
-            raise
+                # Process buckets concurrently
+                await asyncio.gather(
+                    *[process_bucket_with_semaphore(bucket) for bucket in buckets]
+                )
+
+            except Exception as e:
+                logger.error(f"Error listing buckets: {str(e)}")
+                raise
 
         logger.info(f"Returning {len(resources)} resources")
         return resources
@@ -115,17 +120,20 @@ class _ResourceProvider(resource.ResourceProvider):
         bucket = parts[0]
         key = parts[1]
 
-        response = await self.storage.get_object(bucket, key)
-        file_content = response["Body"]
+        session_id = current_session_id.get()
+        async with get_session_context(session_id) as session_config:
+            storage = StorageService.from_session_config(session_config)
+            response = await storage.get_object(bucket, key)
+            file_content = response["Body"]
 
-        content_type = response.get("ContentType", "application/octet-stream")
-        # 根据内容类型返回不同的响应
-        if content_type.startswith("image/"):
-            file_content = base64.b64encode(file_content).decode("utf-8")
+            content_type = response.get("ContentType", "application/octet-stream")
+            # 根据内容类型返回不同的响应
+            if content_type.startswith("image/"):
+                file_content = base64.b64encode(file_content).decode("utf-8")
 
-        return [ReadResourceContents(mime_type=content_type, content=file_content)]
+            return [ReadResourceContents(mime_type=content_type, content=file_content)]
 
 
-def register_resource_provider(storage: StorageService):
-    resource_provider = _ResourceProvider(storage)
+def register_resource_provider():
+    resource_provider = _SessionAwareResourceProvider()
     resource.register_resource_provider(resource_provider)

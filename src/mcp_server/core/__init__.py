@@ -1,4 +1,3 @@
-from ..config import config
 from .storage import load as load_storage
 from .version import load as load_version
 # from .cdn import load as load_cdn
@@ -6,14 +5,11 @@ from .version import load as load_version
 
 
 def load():
-    # 加载配置
-    cfg = config.load_config()
-
     # 版本
-    load_version(cfg)
+    load_version()
     # 存储业务 - 注册会话感知的工具
-    load_storage(cfg, use_session_aware=True)
+    load_storage()
     # # CDN
-    # load_cdn(cfg)
+    # load_cdn()
     # # 智能多媒体
-    # load_media_processing(cfg)
+    # load_media_processing()

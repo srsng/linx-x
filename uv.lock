@@ -493,6 +493,31 @@ wheels = [
 ]
 
 [[package]]
+name = "music-mcp-server"
+version = "1.2.3"
+source = { editable = "." }
+dependencies = [
+    { name = "aioboto3" },
+    { name = "fastjsonschema" },
+    { name = "httpx" },
+    { name = "mcp", extra = ["cli"] },
+    { name = "openai" },
+    { name = "pip" },
+    { name = "qiniu" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aioboto3", specifier = ">=13.2.0" },
+    { name = "fastjsonschema", specifier = ">=2.21.1" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.0.0" },
+    { name = "openai", specifier = ">=1.66.3" },
+    { name = "pip", specifier = ">=25.0.1" },
+    { name = "qiniu", specifier = ">=7.16.0" },
+]
+
+[[package]]
 name = "openai"
 version = "1.66.3"
 source = { registry = "https://pypi.org/simple" }
@@ -683,33 +708,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/26/4a/669255f8a6c7ca6ab531528b4bc9c491cac5144393a1929079d43611739a/qiniu-7.16.0.tar.gz", hash = "sha256:a6187fdfbeb282ebb84b6f614117b0fdc802eee59a3f8cc7eb92683d385e18ef", size = 62153, upload-time = "2025-03-25T03:50:40.056Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1f/ce/591939739ec3f1b120131676d9e6ffd46f8b55e6053d44daa3ac8eb3acb1/qiniu-7.16.0-py3-none-any.whl", hash = "sha256:6e755802220c4a17cea1d5d848dabac5370b9aa5dc8b639c6f04f434ace8d2fd", size = 80984, upload-time = "2025-03-25T03:50:38.599Z" },
-]
-
-[[package]]
-name = "qiniu-mcp-server"
-version = "1.2.3"
-source = { editable = "." }
-dependencies = [
-    { name = "aioboto3" },
-    { name = "fastjsonschema" },
-    { name = "httpx" },
-    { name = "mcp", extra = ["cli"] },
-    { name = "openai" },
-    { name = "pip" },
-    { name = "python-dotenv" },
-    { name = "qiniu" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aioboto3", specifier = ">=13.2.0" },
-    { name = "fastjsonschema", specifier = ">=2.21.1" },
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "mcp", extras = ["cli"], specifier = ">=1.0.0" },
-    { name = "openai", specifier = ">=1.66.3" },
-    { name = "pip", specifier = ">=25.0.1" },
-    { name = "python-dotenv", specifier = ">=1.0.1" },
-    { name = "qiniu", specifier = ">=7.16.0" },
 ]
 
 [[package]]

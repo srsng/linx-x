@@ -12,6 +12,7 @@ Server 来访问七牛云存储、智能多媒体服务等。
 **v1.3.0+ 新增**：支持多租户模式，不同客户端可以使用各自的 ak、sk 通过 SSE 连接，实现完全隔离的访问。
 
 ### 多租户特性
+
 - **独立认证**：每个客户端使用自己的 ak、sk
 - **会话隔离**：每个连接独立的会话上下文
 - **并发安全**：多个客户端同时访问不会相互干扰
@@ -38,6 +39,7 @@ claude mcp add --transport sse qiniu https://your-domain.com/sse \
 详细使用说明请参考 [多租户使用指南](docs/multi-tenant-usage.md)。
 
 能力集：
+
 - 存储
   - 获取 Bucket 列表
   - 获取 Bucket 中的文件列表
@@ -57,6 +59,7 @@ claude mcp add --transport sse qiniu https://your-domain.com/sse \
 - uv 包管理器
 
 如果还没有安装 uv，可以使用以下命令安装：
+
 ```bash
 # Mac，推荐使用 brew 安装
 brew install uv
@@ -80,7 +83,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 
 具体安装方式参考 [uv 安装](https://docs.astral.sh/uv/getting-started/installation/#pypi)
 
-## 在 Cline 中使用：
+## 在 Cline 中使用
 
 步骤：
 
@@ -89,6 +92,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 3. 配置 qiniu MCP
     1. 点击 Cline 图标进入 Cline 插件，选择 MCP Server 模块
     2. 选择 installed，点击 Advanced MCP Settings 配置 MCP Server，参考下面配置信息
+
    ```
    {
      "mcpServers": {
@@ -109,6 +113,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
      }
    }
    ```
+
     3. 点击 qiniu MCP Server 的链接开关进行连接
 4. 在 Cline 中创建一个聊天窗口，此时我们可以和 AI 进行交互来使用 qiniu-mcp-server ，下面给出几个示例：
     - 列举 qiniu 的资源信息
@@ -116,56 +121,46 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
     - 列举 qiniu 中 xxx Bucket 的文件
     - 读取 qiniu xxx Bucket 中 yyy 的文件内容
     - 对 qiniu xxx Bucket 中 yyy 的图片切个宽200像素的圆角
-    - 刷新下 qiniu 的这个 CDN 链接：https://developer.qiniu.com/test.txt
+    - 刷新下 qiniu 的这个 CDN 链接：<https://developer.qiniu.com/test.txt>
 
 注：
 cursor 中创建 MCP Server 可直接使用上述配置。
 claude 中使用时可能会遇到：Error: spawn uvx ENOENT 错误，解决方案：command 中 参数填写 uvx 的绝对路径，eg: /usr/local/bin/uvx
 
 ## 开发
+
 1. 克隆仓库：
 
-```bash
-# 克隆项目并进入目录
-git clone git@github.com:qiniu/qiniu-mcp-server.git
-cd qiniu-mcp-server
-```
+  ```bash
+  # 克隆项目并进入目录
+  git clone git@github.com:qiniu/qiniu-mcp-server.git
+  cd qiniu-mcp-server
+  ```
 
 2. 创建并激活虚拟环境：
 
-```bash
-uv venv
-source .venv/bin/activate  # Linux/macOS
-# 或
-.venv\Scripts\activate  # Windows
-```
+  ```bash
+  uv venv
+  source .venv/bin/activate  # Linux/macOS
+  # 或
+  .venv\Scripts\activate  # Windows
+  ```
 
 3. 安装依赖：
 
-```bash
-uv pip install -e .
-```
+  ```bash
+  uv pip install -e .
+  ```
 
 4. 配置
 
-复制环境变量模板：
-```bash
-cp .env.example .env
-```
+本服务器采用会话感知模式，通过HTTP头部传递认证信息，无需配置环境变量。
+客户端连接时需要在HTTP头部提供以下认证信息：
 
-编辑 `.env` 文件，配置以下参数：
-```bash
-# S3/Kodo 认证信息
-QINIU_ACCESS_KEY=your_access_key
-QINIU_SECRET_KEY=your_secret_key
-
-# 区域信息
-QINIU_REGION_NAME=your_region
-QINIU_ENDPOINT_URL=endpoint_url # eg:https://s3.your_region.qiniucs.com
-
-# 配置 bucket，多个 bucket 使用逗号隔开，建议最多配置 20 个 bucket
-QINIU_BUCKETS=bucket1,bucket2,bucket3
-```
+- `X-AK`: 七牛云Access Key
+- `X-SK`: 七牛云Secret Key  
+- `X-REGION-NAME`: 区域名称
+- `X-BUCKETS`: 存储桶列表（逗号分隔）
 
 扩展功能，首先在 core 目录下新增一个业务包目录（eg: 存储 -> storage），在此业务包目录下完成功能拓展。
 在业务包目录下的 `__init__.py` 文件中定义 load 函数用于注册业务工具或者资源，最后在 `core` 目录下的 `__init__.py`
@@ -205,7 +200,3 @@ uv --directory . run qiniu-mcp-server
 ```bash
 uv --directory . run qiniu-mcp-server --transport sse --port 8000
 ```
-
-
-
-
