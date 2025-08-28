@@ -53,8 +53,8 @@ def main(port: int, transport: str) -> int:
                 logger.error(f"Header validation failed: {error_msg}")
                 return JSONResponse(status_code=401, content={"error": error_msg})
 
-            # 创建会话
-            session_id = session_manager.create_session(
+            # 创建会话并预加载音乐文件
+            session_id = await session_manager.create_session(
                 access_key=config.access_key,
                 secret_key=config.secret_key,
                 endpoint_url=config.endpoint_url,

@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import base64
 
@@ -22,78 +21,48 @@ class _SessionAwareResourceProvider(resource.ResourceProvider):
         super().__init__("s3")
 
     async def list_resources(
-        self, prefix: str = "", max_keys: int = 20, **kwargs
+        self, prefix: str = "", max_keys: int = 300, **kwargs
     ) -> list[types.Resource]:
         """
-        List S3 buckets and their contents as resources with pagination
+        List cached music files as resources with pagination
         Args:
-            prefix: Prefix listing after this bucket name
-            max_keys: Returns the maximum number of keys (up to 100), default 20
+            prefix: Prefix filter for resource names
+            max_keys: Returns the maximum number of keys (default 300)
         """
+        from ...session import session_manager
+
         resources = []
-        logger.debug("Starting to list resources")
+        logger.debug("Starting to list cached music resources")
 
         session_id = current_session_id.get()
-        async with get_session_context(session_id) as session_config:
-            storage = StorageService.from_session_config(session_config)
-            logger.debug(f"Configured buckets: {storage.config.buckets}")
+        if not session_id:
+            logger.warning("No session_id found in context")
+            return resources
 
-            try:
-                # Get limited number of buckets
-                buckets = await storage.list_buckets(prefix)
+        try:
+            music_cache = session_manager.get_music_cache()
 
-                # limit concurrent operations
-                async def process_bucket(bucket):
-                    bucket_name = bucket["Name"]
-                    logger.debug(f"Processing bucket: {bucket_name}")
+            # 获取分页参数
+            offset = kwargs.get("offset", 0)
 
-                    try:
-                        # List objects in the bucket with a reasonable limit
-                        objects = await storage.list_objects(
-                            bucket_name, max_keys=max_keys
-                        )
+            # 从缓存中获取音乐文件列表
+            music_resources = music_cache.get_music_files(
+                session_id, offset=offset, limit=max_keys
+            )
 
-                        for obj in objects:
-                            if "Key" in obj and not obj["Key"].endswith("/"):
-                                object_key = obj["Key"]
-                                if storage.is_markdown_file(object_key):
-                                    mime_type = "text/markdown"
-                                elif storage.is_image_file(object_key):
-                                    mime_type = "image/png"
-                                else:
-                                    mime_type = "text/plain"
+            for music_resource in music_resources:
+                # 应用前缀过滤
+                if prefix and not music_resource.name.startswith(prefix):
+                    continue
 
-                                resource_entry = types.Resource(
-                                    uri=f"s3://{bucket_name}/{object_key}",
-                                    name=object_key,
-                                    mimeType=mime_type,
-                                    description=str(obj),
-                                )
-                                resources.append(resource_entry)
-                                logger.debug(f"Added resource: {resource_entry.uri}")
+                resources.append(music_resource)
 
-                    except Exception as e:
-                        logger.error(
-                            f"Error listing objects in bucket {bucket_name}: {str(e)}"
-                        )
+            logger.debug(f"Listed {len(resources)} music resources from cache")
 
-                # Use semaphore to limit concurrent bucket processing
-                semaphore = asyncio.Semaphore(3)  # Limit concurrent bucket processing
+        except Exception as e:
+            logger.error(f"Error listing music resources from cache: {str(e)}")
 
-                async def process_bucket_with_semaphore(bucket):
-                    async with semaphore:
-                        await process_bucket(bucket)
-
-                # Process buckets concurrently
-                await asyncio.gather(
-                    *[process_bucket_with_semaphore(bucket) for bucket in buckets]
-                )
-
-            except Exception as e:
-                logger.error(f"Error listing buckets: {str(e)}")
-                raise
-
-        logger.info(f"Returning {len(resources)} resources")
+        logger.info(f"Returning {len(resources)} music resources")
         return resources
 
     async def read_resource(self, uri: types.AnyUrl, **kwargs) -> ResourceContents:
