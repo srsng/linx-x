@@ -57,7 +57,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 
 具体安装方式参考 [uv 安装](https://docs.astral.sh/uv/getting-started/installation/#pypi)
 
-## 开始
+## 部署
 
 任意支持MCP协议的客户端（如Claude for Desktop、Cursor、Cherry Studio 和 Cline等）都可以简单且快速的接入音乐网盘MCP Server。
 
@@ -65,20 +65,6 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 
 - HTTP 远程传输
   - [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events)（SSE）
-
-下面提供通用的接入配置，客户端接入的配置示例则在最后采用Cursor作为接入演示。请根据您客户端的兼容性选择合适的传输方式进行接入。
-
-### HTTP 远程传输接入
-
-#### SSE 地址
-
-```shell
-http://localhost:8000/sse
-```
-
-### stdio 本地传输接入
-
-#### python（pip、uvx）
 
 1. 克隆仓库并进入目录
 
@@ -113,7 +99,7 @@ uv --directory . run music-mcp-server --transport sse --port 8000
 - `X-REGION-NAME`: 音乐存储区域名称
 - `X-BUCKETS`: 音乐存储桶列表（逗号分隔，如：music-library,albums,playlists）
 
-### Cursor 平台远程接入音乐网盘MCP Server
+### Cursor 平台远程接入音乐网盘MCP Server示例
 
 对于SSE接入，需在配置文件中添加
 
