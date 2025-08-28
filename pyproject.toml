@@ -1,0 +1,26 @@
+[project]
+name = "music-mcp-server"
+version = "1.2.3"
+description = "Music MCP Server - 基于七牛云的智能音乐网盘服务"
+requires-python = ">=3.12"
+authors = []
+keywords = ["music", "mcp", "llm"]
+dependencies = [
+    "aioboto3>=13.2.0",
+    "fastjsonschema>=2.21.1",
+    "httpx>=0.28.1",
+    "mcp[cli]>=1.0.0",
+    "openai>=1.66.3",
+    "pip>=25.0.1",
+    "qiniu>=7.16.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+music-mcp-server = "mcp_server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_server"]
