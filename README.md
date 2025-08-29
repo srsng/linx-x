@@ -16,17 +16,17 @@
 1. 音乐文件列表 `list_music`
     - 描述: 获取音乐文件列表，可以使用`prefix`根据路径过滤，返回音乐文件的key（名称，路径，还可以用于获取下载url）列表
     - 参数:
-      - `max_keys` 最大返回的文件对象数量，默认为100，最大为500
-      - `prefix` 音乐文件名前缀过滤。只返回路径以此前缀开头的音乐文件
-      - `start_after` 分页起始位置。从指定的音乐文件名之后开始列出，用于实现分页浏览
+      - `max_keys` (optional) 最大返回的文件对象数量，默认为100，最大为500
+      - `prefix` (optional) 音乐文件名前缀过滤。只返回路径以此前缀开头的音乐文件
+      - `start_after` (optional) 分页起始位置。从指定的音乐文件名之后开始列出，用于实现分页浏览
     - 输出: 音乐文件列表，包含`Bucket`, `Key`, `Size`等信息
 
 2. 音乐播放链接 `get_music_url`
     - 描述: 使用通过`list_music`获取到的音乐文件key，获取指定音乐文件的播放URL。可以使用此URL直接在音乐播放器中播放音乐，无需下载完整文件
     - 参数:
       - `key` 音乐对应的key，通过`list_music`获得
-      - `expires` 链接有效期，单位秒，默认3600秒
-    - 输出: 播放URL信息，包含`bucket`, `key`, `url`, `size`, `mime_type`等
+      - `expires` (optional) 链接有效期，单位秒，默认3600秒
+    - 输出: 音乐文件URL信息，包含`bucket`, `key`, `url`, `size`, `mime_type`等
 
 ## 环境要求
 

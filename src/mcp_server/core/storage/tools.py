@@ -371,7 +371,7 @@ def register_session_aware_tools() -> None:
     # 注册对外提供的工具
     tools.auto_register_tools(
         [
-            impl.list_music,     # 音乐文件列表工具
+            impl.list_music,  # 音乐文件列表工具
             impl.get_music_url,  # 音乐URL生成工具
         ]
     )
