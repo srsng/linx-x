@@ -111,7 +111,8 @@ class SessionAwareToolImpl:
     @tools.tool_meta(
         types.Tool(
             name="list_music",
-            description="获取音乐文件列表, 可以使用`prefix`根据路径过滤, 返回音乐文件的key（名称，路径，还可以用于获取下载url）列表。",
+            description="获取音乐文件列表, 可以使用`prefix`根据路径过滤, 返回音乐文件的key与url列表。",
+            # description="获取音乐文件列表, 可以使用`prefix`根据路径过滤, 返回音乐文件的key（名称，路径，还可以用于获取下载url）列表。",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -372,7 +373,7 @@ def register_session_aware_tools() -> None:
     tools.auto_register_tools(
         [
             impl.list_music,  # 音乐文件列表工具
-            impl.get_music_url,  # 音乐URL生成工具
+            # impl.get_music_url,  # 音乐URL生成工具
         ]
     )
 

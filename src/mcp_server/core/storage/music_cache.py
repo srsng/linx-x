@@ -120,9 +120,24 @@ class MusicCache:
 
                 for obj in objects:
                     if self._is_valid_music_object(obj):
-                        # 为对象添加bucket信息
+                        # 为对象添加bucket和url信息
                         obj_with_bucket = obj.copy()
                         obj_with_bucket["Bucket"] = bucket_name
+
+                        # 获取URL
+                        key = obj_with_bucket["Key"]
+                        try:
+                            object_urls = storage.get_object_url(bucket_name, key)
+
+                            if object_urls:
+                                # 默认选择第一个URL
+                                obj_with_bucket["URL"] = object_urls[0].get(
+                                    "object_url"
+                                )
+                        except Exception as url_exc:
+                            logger.warning(f"无法获取文件 {key} 的URL: {url_exc}")
+                            obj_with_bucket["URL"] = None
+
                         bucket_music_files.append(obj_with_bucket)
 
                 logger.info(
@@ -258,6 +273,7 @@ class MusicCache:
                 name=object_key,
                 mimeType=mime_type,
                 description=f"音乐文件: {object_key} (大小: {obj.get('Size', 0)} 字节)",
+                url=obj.get("URL"),
             )
             resources.append(resource)
 
